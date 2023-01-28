@@ -42,7 +42,7 @@ export default function SignUp() {
         }
     }
     return (
-        <Wrapper>
+        <Wrapper clicked={clicked}>
             <h1>MyWallet</h1>
             <input data-test="name" type='text' onChange={(event) => setName(event.target.value) } placeholder='Nome'></input>
             <input data-test="email" type='email' onChange={(event) => setEmail(event.target.value)} placeholder='E-mail'></input>
@@ -107,6 +107,7 @@ const Wrapper = styled.div`
         font-size: 20px;
     }
     button{
+        display: ${props => props.clicked ? 'none' : 'block'};
         background-color: #A328D6;
         font-family: 'Raleway';
         color: #FFF;
