@@ -2,7 +2,8 @@ import styled from "styled-components"
 import { Link, useNavigate } from "react-router-dom"
 import { useState, useContext } from "react"
 import axios from "axios";
-import {AuthContext} from '../contexts/auth.js'
+import {AuthContext} from '../contexts/auth.jsx'
+import { ThreeDots } from "react-loader-spinner";
 
 
 export default function SignUp() {
@@ -13,6 +14,7 @@ export default function SignUp() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const {REACT_APP_API_URL} = useContext(AuthContext);
+    const [clicked, setClicked] = useState(false);
 
 
     async function signUp() {
@@ -24,13 +26,16 @@ export default function SignUp() {
         }
         if (password === confirmPassword)
             try {
+                setClicked(true);
                 const response = await axios.post(`${REACT_APP_API_URL}/signUp`, user);
                 console.log(response);
                 navigate('/');
             }
             catch (error) {
+                setClicked(false);
                 console.log(error.response.data);
                 setError(error.response.data);
+                
             }
         else {
             setError('Senhas diferentes');
@@ -45,6 +50,26 @@ export default function SignUp() {
             <input data-test="conf-password" type='password' onChange={(event) => setConfirmPassword(event.target.value)} placeholder='Confirme a senha'></input>
             <div>{error}</div>
             <button data-test="sign-up-submit" onClick={signUp}>Cadastrar</button>
+            <ThreeDots onClick={signUp} 
+                height="50"
+                width="80"
+                radius="9"
+                color="#8415a0"
+                ariaLabel="three-dots-loading"
+                wrapperStyle={{
+                    display: clicked ? 'flex' : 'none',
+                    justifyContent: 'center',
+                    backgroundColor: '#A328D6',
+                    fontFamily: 'Raleway',
+                    fontSize: 'x-large',
+                    fontWeight: 'bold',
+                    width: '80vw',
+                    height: '50px',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer'
+                }}
+                wrapperClassName=""/>
             <Link to='/'>Já tem uma conta? Entre agora!</Link>
         </Wrapper>
     )
@@ -67,6 +92,7 @@ const Wrapper = styled.div`
         margin-bottom: 25px;
     }
     input{
+        padding-left: 10px;
         height: 60px;
         width: 80vw;
         border-radius: 5px;
@@ -77,7 +103,7 @@ const Wrapper = styled.div`
     input::placeholder{
         font-family: 'Raleway';
         color:#000;
-        padding-left: 10px;
+        padding-left: 2px;
         font-size: 20px;
     }
     button{

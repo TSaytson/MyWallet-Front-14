@@ -2,40 +2,63 @@ import styled from "styled-components"
 import { Link, useNavigate } from "react-router-dom"
 import { useContext, useState } from "react";
 import axios from "axios";
-import {AuthContext} from '../contexts/auth.js'
+import { AuthContext } from '../contexts/auth.jsx'
+import { ThreeDots } from "react-loader-spinner";
 
 export default function SingIn() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const {setName, setToken, REACT_APP_API_URL} = useContext(AuthContext);
-
+    const { setName, setToken, REACT_APP_API_URL } = useContext(AuthContext);
+    const [clicked, setClicked] = useState(false);
     async function signIn() {
         const user = {
             email,
             password
         }
         try {
+            setClicked(true);
             const response = await axios.post(`${REACT_APP_API_URL}/signIn`, user);
             console.log(response);
             setToken(response.data.token);
             setName(response.data.name);
-            navigate('/registry', {state:response.data.name});
+            navigate('/registry', { state: response.data.name });
         }
         catch (error) {
+            setClicked(false);
             console.log(error.response.data);
             setError(error.response.data);
         }
     }
 
     return (
-        <Wrapper>
+        <Wrapper clicked={clicked}>
             <h1>MyWallet</h1>
-            <input data-test="email" type='text' onChange={(event) => setEmail(event.target.value)} placeholder='E-mail'></input>
+            <input data-test="email" type='email' required onChange={(event) => setEmail(event.target.value)} placeholder='E-mail'></input>
             <input data-test="password" type='password' onChange={(event) => setPassword(event.target.value)} placeholder='Senha'></input>
             <div>{error}</div>
             <button data-test="sign-in-submit" onClick={signIn}>Entrar</button>
+            <ThreeDots onClick={signIn} 
+                height="50"
+                width="80"
+                radius="9"
+                color="#8415a0"
+                ariaLabel="three-dots-loading"
+                wrapperStyle={{
+                    display: clicked ? 'flex' : 'none',
+                    justifyContent: 'center',
+                    backgroundColor: '#A328D6',
+                    fontFamily: 'Raleway',
+                    fontSize: 'x-large',
+                    fontWeight: 'bold',
+                    width: '80vw',
+                    height: '50px',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer'
+                }}
+                wrapperClassName=""/>
             <Link to={'/sign-up'}>Primeira vez? Cadastre-se</Link>
         </Wrapper>
     )
@@ -58,6 +81,7 @@ const Wrapper = styled.div`
         margin-bottom: 25px;
     }
     input{
+        padding-left: 10px;
         height: 60px;
         width: 80vw;
         border-radius: 5px;
@@ -67,11 +91,12 @@ const Wrapper = styled.div`
     }
     input::placeholder{
         font-family: 'Raleway';
+        padding-left: 2px;
         color:#000;
-        padding-left: 10px;
         font-size: 20px;
     }
     button{
+        display: ${props => props.clicked ? 'none' : 'block'} ;
         background-color: #A328D6;
         font-family: 'Raleway';
         color: #FFF;
@@ -81,6 +106,7 @@ const Wrapper = styled.div`
         height: 50px;
         border: none;
         border-radius: 5px;
+        cursor: pointer;
     }
     a{
         margin-top: 35px;

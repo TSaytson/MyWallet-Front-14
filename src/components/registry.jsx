@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useEffect, useState, useContext } from "react"
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { AuthContext } from '../contexts/auth.js'
+import { AuthContext } from '../contexts/auth.jsx'
 
 
 export default function Registry() {

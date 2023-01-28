@@ -1,9 +1,8 @@
-
 import axios from "axios";
 import { useState, useContext } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components"
-import {AuthContext} from '../contexts/auth.js'
+import {AuthContext} from '../contexts/auth.jsx'
 
 
 export default function Transaction() {

@@ -4,9 +4,11 @@ import SignIn from './components/signIn'
 import SignUp from './components/signUp'
 import Registry from './components/registry';
 import Transaction from './components/transaction'
-import AuthProvider from './contexts/auth.js';
+import AuthProvider from './contexts/auth.jsx';
+
 
 function App() {
+
   return (
     <BrowserRouter>
       <ResetCss />
@@ -22,4 +24,4 @@ function App() {
   );
 }
 
-export default App;
+export default App
