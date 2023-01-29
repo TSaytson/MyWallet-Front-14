@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useState, useContext } from "react"
 import axios from "axios";
 import {AuthContext} from '../contexts/auth.jsx'
@@ -13,6 +13,7 @@ export default function SignUp() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
     const {REACT_APP_API_URL} = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
 
@@ -28,8 +29,7 @@ export default function SignUp() {
             try {
                 setClicked(true);
                 const response = await axios.post(`${REACT_APP_API_URL}/signUp`, user);
-                console.log(response);
-                navigate('/');
+                navigate('/', {state: response.data});
             }
             catch (error) {
                 setClicked(false);
@@ -117,6 +117,7 @@ const Wrapper = styled.div`
         height: 50px;
         border: none;
         border-radius: 5px;
+        cursor: pointer;
     }
     a{
         margin-top: 35px;

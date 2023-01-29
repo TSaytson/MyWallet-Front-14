@@ -1,17 +1,19 @@
 import styled from "styled-components"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useContext, useState } from "react";
 import axios from "axios";
 import { AuthContext } from '../contexts/auth.jsx'
 import { ThreeDots } from "react-loader-spinner";
 
 export default function SingIn() {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate();
     const { setName, setToken, REACT_APP_API_URL } = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
+
     async function signIn() {
         const user = {
             email,
@@ -20,7 +22,6 @@ export default function SingIn() {
         try {
             setClicked(true);
             const response = await axios.post(`${REACT_APP_API_URL}/signIn`, user);
-            console.log(response);
             setToken(response.data.token);
             setName(response.data.name);
             navigate('/registry', { state: response.data.name });
@@ -37,7 +38,7 @@ export default function SingIn() {
             <h1>MyWallet</h1>
             <input data-test="email" type='email' required onChange={(event) => setEmail(event.target.value)} placeholder='E-mail'></input>
             <input data-test="password" type='password' onChange={(event) => setPassword(event.target.value)} placeholder='Senha'></input>
-            <div>{error}</div>
+            <div>{location.state ? location.state : error}</div>
             <button data-test="sign-in-submit" onClick={signIn}>Entrar</button>
             <ThreeDots onClick={signIn} 
                 height="50"

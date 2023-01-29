@@ -6,24 +6,44 @@ import { AuthContext } from '../contexts/auth.jsx'
 
 
 export default function Registry() {
-    const [entries, setEntries] = useState([]);
     const navigate = useNavigate();
+    const [entries, setEntries] = useState([]);
     const { name, token, setToken, REACT_APP_API_URL } = useContext(AuthContext);
+
     let balance = 0;
     entries.forEach((entry) => {
-        {entry.type === 'withdraw' ? 
-                    balance -= Number(entry.value) : balance += Number(entry.value)}
+        {
+            entry.type === 'withdraw' ?
+                balance -= Number(entry.value) : balance += Number(entry.value)
+        }
     });
-
     async function getEntries() {
-        const config = {
-            headers: { "authorization": `Bearer ${token}` }
+        const headers = {
+            "authorization": `Bearer ${token}`
         }
         try {
-            const response = await axios.get(`${REACT_APP_API_URL}/transactions`, config);
+            const response = await axios.get(`${REACT_APP_API_URL}/transactions`, {headers});
             setEntries(response.data);
         } catch (error) {
             console.log(error);
+        }
+    }
+    async function deleteEntry(id, userId) {
+        if (window.confirm()) {
+            const config = {
+                headers: { "authorization": `Bearer ${token}` }
+            }
+            const body = {
+                id,
+                userId
+            }
+            console.log(config);
+            try {
+                const response = await axios.delete(`${REACT_APP_API_URL}/transactions/`, body, config);
+                console.log(response.data);
+            } catch (error) {
+                console.log(error.response);
+            }
         }
     }
     useEffect(() => {
@@ -39,20 +59,28 @@ export default function Registry() {
                     navigate('/')
                 }}></ion-icon>
             </div>
-            <Entries isEntry={entries.length} balance={balance}>{(entries.length === 0) ?
-                'Não há registro de entrada ou saída' : entries.map((entry) => <Entry type={entry.type}>
-                    
-                    <div>
-                        <p>{entry.time}</p>
-                        <p>{entry.description}</p>
-                    </div>
-                    <p>R${entry.value.toString().replaceAll('.', ',')}</p>
-                    
-                </Entry>
-                )}
+            <Entries hasEntries={entries.length} balance={balance}>
+                {(entries.length === 0) ?
+                    'Não há registro de entrada ou saída' : entries.map((entry, index) =>
+                        <Entry type={entry.type} key={index}>
+                            <div>
+                                <p>{entry.time}</p>
+                                <p>{entry.description}</p>
+                            </div>
+                            <div>
+                                <p>R${entry.value.toString().replaceAll('.', ',')}</p>
+                                <ion-icon onClick={() => deleteEntry(entry._id, entry.userId)} name="close-circle-outline"></ion-icon>
+                            </div>
+                        </Entry>
+                    )}
                 <div>
-                    <p>Saldo</p>
-                    <p>{balance}</p>
+                    {(entries.length) ?
+                        <>
+                            <p>SALDO</p>
+                            <p>R${balance}</p>
+                        </>
+                        : ''
+                    }
                 </div>
             </Entries>
             <Bottom>
@@ -77,7 +105,7 @@ const Wrapper = styled.div`
     justify-content: center;
     width: 100vw;
     height: 100vh;
-    div{
+    > div{
         height: 30px;
         width: 80vw;
         margin-bottom: 20px;
@@ -98,30 +126,48 @@ const Wrapper = styled.div`
     }
 `
 const Entries = styled.main`
+    position: relative;
     background-color: #fff;
     border-radius: 5px;
     width: 80vw;
     height: 65vh;
     display: flex;
     flex-direction: column;
-    justify-content: ${(props) => (props.isEntry) ? 'flex-start' : 'center'};
-    align-items: ${(props) => (props.isEntry) ? 'space-between' : 'center'};
+    justify-content: ${(props) => (props.hasEntries) ? 'flex-start' : 'center'};
+    align-items: ${(props) => (props.hasEntries) ? 'space-between' : 'center'};
     text-align: center;
     font-family: 'Raleway';
     font-size: 20px;
     color: #868686;
     margin-bottom: 65px;
-    div:nth-child(2){
+    p{
+        margin: 2px 10px;
+    }
+    > div{
+        position: absolute;
+        bottom: 10px;
+        left: 0;
         display: flex;
+        width: 80vw;
         justify-content: space-between;
+        p:nth-child(1){
+            color: black;
+            font-size: 17px;
+            font-weight: bold;
+        }
+        p:nth-child(2){
+            color:#03AC00;
+            font-size: 17px;
+        }
+
     }
 `
 const Entry = styled.ul`
     display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
     div{
         display: flex;
-        justify-content: flex-start;
-        margin-left:10px;
         p{
             font-size: 16px;
             font-family: 'Raleway';
@@ -131,13 +177,19 @@ const Entry = styled.ul`
         }
         p:nth-child(2){
             color:black;
-            margin-left:5px;
+            margin-left: 0px;
         }
     }
-    p{
-        color: ${(props) => (props.type) === 'entry' ? '#03AC00' : 'red'};
-        font-size: 16px;
-        font-family: 'Raleway';
+    div:nth-child(2){
+        p{
+            color: ${(props) => (props.type) === 'entry' ? '#03AC00' : 'red'};
+            font-size: 16px;
+            font-family: 'Raleway';        
+        }
+    }
+    ion-icon{
+        margin-right: 10px;
+        cursor: pointer;
     }
 `
 const Bottom = styled.div`

@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ResetCss } from './ResetCss'
-import SignIn from './components/signIn'
-import SignUp from './components/signUp'
-import Registry from './components/registry';
-import Transaction from './components/transaction'
+import SignIn from './pages/signIn'
+import SignUp from './pages/signUp'
+import Registry from './pages/registry';
+import Transaction from './pages/transaction'
 import AuthProvider from './contexts/auth.jsx';
 
 
