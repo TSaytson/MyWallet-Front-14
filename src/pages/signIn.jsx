@@ -11,7 +11,7 @@ export default function SingIn() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { setName, setToken, REACT_APP_API_URL } = useContext(AuthContext);
+    const { setName, setToken, API_URL } = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
 
     async function signIn() {
@@ -21,7 +21,7 @@ export default function SingIn() {
         }
         try {
             setClicked(true);
-            const response = await axios.post(`${REACT_APP_API_URL}/signIn`, user);
+            const response = await axios.post(`${API_URL}/signIn`, user);
             setToken(response.data.token);
             setName(response.data.name);
             navigate('/registry', { state: response.data.name });

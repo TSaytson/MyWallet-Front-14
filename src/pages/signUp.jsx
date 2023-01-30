@@ -13,8 +13,7 @@ export default function SignUp() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const location = useLocation();
-    const {REACT_APP_API_URL} = useContext(AuthContext);
+    const {API_URL} = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
 
 
@@ -28,7 +27,7 @@ export default function SignUp() {
         if (password === confirmPassword)
             try {
                 setClicked(true);
-                const response = await axios.post(`${REACT_APP_API_URL}/signUp`, user);
+                const response = await axios.post(`${API_URL}/signUp`, user);
                 navigate('/', {state: response.data});
             }
             catch (error) {
