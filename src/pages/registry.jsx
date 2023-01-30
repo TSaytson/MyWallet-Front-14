@@ -8,7 +8,7 @@ import { AuthContext } from '../contexts/auth.jsx'
 export default function Registry() {
     const navigate = useNavigate();
     const [entries, setEntries] = useState([]);
-    const { name, token, setToken, REACT_APP_API_URL } = useContext(AuthContext);
+    const { name, token, setToken, API_URL } = useContext(AuthContext);
 
     let balance = 0;
     entries.forEach((entry) => {
@@ -39,7 +39,7 @@ export default function Registry() {
             }
             console.log(config);
             try {
-                const response = await axios.delete(`${REACT_APP_API_URL}/transactions/`, body, config);
+                const response = await axios.delete(`${API_URL}/transactions/`, body, config);
                 console.log(response.data);
             } catch (error) {
                 console.log(error.response);

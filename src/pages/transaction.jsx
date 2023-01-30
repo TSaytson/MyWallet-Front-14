@@ -10,7 +10,7 @@ export default function Transaction() {
     const location = useLocation();
     const [value, setValue] = useState(null);
     const [description, setDescription] = useState('');
-    const {token, REACT_APP_API_URL} = useContext(AuthContext);
+    const {token, API_URL} = useContext(AuthContext);
 
 
     async function saveTransaction() {
@@ -25,7 +25,7 @@ export default function Transaction() {
             }
             try {
                 const response = await axios
-                    .post(`${REACT_APP_API_URL}/transactions`, transaction, config);
+                    .post(`${API_URL}/transactions`, transaction, config);
                 console.log(response);
                 navigate('/registry');
             }
