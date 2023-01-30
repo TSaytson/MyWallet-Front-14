@@ -22,7 +22,7 @@ export default function Registry() {
             "authorization": `Bearer ${token}`
         }
         try {
-            const response = await axios.get(`${REACT_APP_API_URL}/transactions`, {headers});
+            const response = await axios.get(`${API_URL}/transactions`, {headers});
             setEntries(response.data);
         } catch (error) {
             console.log(error);
