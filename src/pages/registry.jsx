@@ -23,26 +23,21 @@ export default function Registry() {
         }
         try {
             const response = await axios.get(`${API_URL}/transactions`, {headers});
+            console.log(response.data);
             setEntries(response.data);
         } catch (error) {
             console.log(error);
         }
     }
-    async function deleteEntry(id, userId) {
-        if (window.confirm()) {
-            const config = {
-                headers: { "authorization": `Bearer ${token}` }
-            }
-            const body = {
-                id,
-                userId
-            }
-            console.log(config);
+    async function deleteEntry(id) {
+        if (window.confirm('Excluir?')) {
+            const headers = { "authorization": `Bearer ${token}` }
             try {
-                const response = await axios.delete(`${API_URL}/transactions/`, body, config);
+                const response = await axios.delete(`${API_URL}/transactions/${id}`, {headers});
                 console.log(response.data);
+                getEntries();
             } catch (error) {
-                console.log(error.response);
+                console.log(error);
             }
         }
     }
@@ -64,12 +59,12 @@ export default function Registry() {
                     'Não há registro de entrada ou saída' : entries.map((entry, index) =>
                         <Entry type={entry.type} key={index}>
                             <div>
-                                <p>{entry.time}</p>
+                                <p>{entry.formatedDate}</p>
                                 <p>{entry.description}</p>
                             </div>
                             <div>
                                 <p>R${entry.value.toString().replaceAll('.', ',')}</p>
-                                <ion-icon onClick={() => deleteEntry(entry._id, entry.userId)} name="close-circle-outline"></ion-icon>
+                                <ion-icon onClick={() => deleteEntry(entry._id)} name="close-circle-outline"></ion-icon>
                             </div>
                         </Entry>
                     )}

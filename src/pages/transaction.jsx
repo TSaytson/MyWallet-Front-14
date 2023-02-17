@@ -8,42 +8,76 @@ import {AuthContext} from '../contexts/auth.jsx'
 export default function Transaction() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [value, setValue] = useState(null);
-    const [description, setDescription] = useState('');
+    const [form, setForm] = useState({
+        value: 0,
+        description: '',
+        date: null
+    })
+    const [error, setError] = useState('');
     const {token, API_URL} = useContext(AuthContext);
 
-
-    async function saveTransaction() {
-        if (value && description) {
+    async function saveTransaction(e) {
+        e.preventDefault();
             const transaction = {
-                value,
-                description,
+                ...form,
                 type: location.state[0]
             }
-            const config = {
-                headers: {'authorization': `Bearer ${token}`}
-            }
+            console.log(transaction);
+            const headers = {'authorization': `Bearer ${token}`};
+
             try {
                 const response = await axios
-                    .post(`${API_URL}/transactions`, transaction, config);
+                    .post(`${API_URL}/transactions`, transaction, {headers});
                 console.log(response);
                 navigate('/registry');
             }
             catch (error) {
                 console.log(error);
+                setError(error.response.data);
             }
-        }
-        else
-            console.log('Preencha todos os campos');
+    }
+
+    function handleForm(e){
+        setForm({...form, [e.target.name] : e.target.value});
     }
     return (
         <Wrapper>
             <div>
                 <h1>Nova {location.state[0] === 'entry' ? 'entrada' : 'saída'}</h1>
             </div>
-            <input onChange={(event) => setValue(event.target.value) }type='number' placeholder="Valor"></input>
-            <input onChange={ (event) => setDescription(event.target.value)}type='text' placeholder="Descrição"></input>
-            <button onClick={saveTransaction}>Salvar {location.state[0] === 'entry' ? 'entrada' : 'saída'}</button>
+            <StyledForm onSubmit={saveTransaction} error={error}>
+            <label htmlFor="value"></label>
+            <input 
+            required
+            id="value"
+            name="value"
+            onChange={handleForm } 
+            type='number'
+            min='1'
+            placeholder="Valor"
+            />
+            <label htmlFor="description"></label>
+            <input 
+            required
+            id="description"
+            name="description"
+            onChange={ handleForm}
+            type='text' 
+            placeholder="Descrição"
+            />
+            <label htmlFor="date"></label>
+            <input
+            required
+            id="date"
+            name="date"
+            onChange={handleForm}
+            type='datetime-local'
+            min='2023-01-01T00:00'
+            max='2023-12-31T00:00'
+            />
+            <button type='submit'>Salvar {location.state[0] === 'entry' ? 'entrada' : 'saída'}</button>
+            <div>{error}</div>
+            </StyledForm>
         </Wrapper>
     )
 }
@@ -56,7 +90,7 @@ const Wrapper = styled.div`
     justify-content: flex-start;
     width: 100vw;
     height: 100vh;
-    div{
+    >div{
         margin-top: 30px;
         height: 30px;
         width: 80vw;
@@ -72,7 +106,15 @@ const Wrapper = styled.div`
             margin-bottom: 10px;
         }
     }    
+
+`
+const StyledForm = styled.form`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     input{
+        padding-left: 10px;
         height: 60px;
         width: 80vw;
         border-radius: 5px;
@@ -83,7 +125,7 @@ const Wrapper = styled.div`
     input::placeholder{
         font-family: 'Raleway';
         color:#000;
-        padding-left: 10px;
+        padding-left: 2px;
         font-size: 20px;
     }
     button{
@@ -98,5 +140,11 @@ const Wrapper = styled.div`
         border-radius: 5px;
         cursor: pointer;
     }
-    
+    div{
+        display: ${(props) => props.error ? 'block' : 'none'};
+        font-family: 'Raleway';
+        font-size: 18px;
+        color: #fa0a0a;
+        margin-top: 10px;
+    }
 `

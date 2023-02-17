@@ -14,7 +14,8 @@ export default function SingIn() {
     const { setName, setToken, API_URL } = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
 
-    async function signIn() {
+    async function signIn(e) {
+        e.preventDefault();
         const user = {
             email,
             password
@@ -36,11 +37,12 @@ export default function SingIn() {
     return (
         <Wrapper clicked={clicked}>
             <h1>MyWallet</h1>
+            <Form onSubmit={signIn}>
             <input data-test="email" type='email' required onChange={(event) => setEmail(event.target.value)} placeholder='E-mail'></input>
             <input data-test="password" type='password' onChange={(event) => setPassword(event.target.value)} placeholder='Senha'></input>
             <div>{location.state ? location.state : error}</div>
-            <button data-test="sign-in-submit" onClick={signIn}>Entrar</button>
-            <ThreeDots onClick={signIn} 
+            <button data-test="sign-in-submit" type='submit'>Entrar</button>
+            <ThreeDots type='submit'
                 height="50"
                 width="80"
                 radius="9"
@@ -60,6 +62,8 @@ export default function SingIn() {
                     cursor: 'pointer'
                 }}
                 wrapperClassName=""/>
+            </Form>
+            
             <Link to={'/sign-up'}>Primeira vez? Cadastre-se</Link>
         </Wrapper>
     )
@@ -81,6 +85,22 @@ const Wrapper = styled.div`
         color:white;
         margin-bottom: 25px;
     }
+    
+    a{
+        margin-top: 35px;
+        font-size: 15px;
+        font-weight: bold;
+        font-family: 'Raleway';
+        color: #FFF;
+        text-decoration: none;
+    }
+    
+`
+const Form = styled.form`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     input{
         padding-left: 10px;
         height: 60px;
@@ -108,14 +128,6 @@ const Wrapper = styled.div`
         border: none;
         border-radius: 5px;
         cursor: pointer;
-    }
-    a{
-        margin-top: 35px;
-        font-size: 15px;
-        font-weight: bold;
-        font-family: 'Raleway';
-        color: #FFF;
-        text-decoration: none;
     }
     div{
         margin-bottom: 10px;
