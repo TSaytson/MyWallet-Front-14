@@ -72,8 +72,8 @@ export default function Transaction() {
             name="date"
             onChange={handleForm}
             type='date'
-            min='2023-01-01'
-            max='2023-12-31'
+            min='2022-01-01'
+            max='2024-12-31'
             />
             <button type='submit'>Salvar {location.state[0] === 'entry' ? 'entrada' : 'saída'}</button>
             <div>{error}</div>
