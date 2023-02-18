@@ -59,7 +59,7 @@ export default function Registry() {
                     'Não há registro de entrada ou saída' : entries.map((entry, index) =>
                         <Entry type={entry.type} key={index}>
                             <div>
-                                <p>{entry.formatedDate}</p>
+                                <p>{entry.date.substr(8,2)}/{entry.date.substr(5,2)}/{entry.date.substr(2,2)}</p>
                                 <p>{entry.description}</p>
                             </div>
                             <div>
