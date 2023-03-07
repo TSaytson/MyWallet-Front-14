@@ -59,12 +59,16 @@ export default function Registry() {
                     'Não há registro de entrada ou saída' : entries.map((entry, index) =>
                         <Entry type={entry.type} key={index}>
                             <div>
-                                <p>{entry.date.substr(8,2)}/{entry.date.substr(5,2)}/{entry.date.substr(2,2)}</p>
+                                <p>
+                                    {entry.date.substr(8,2)}/{entry.date.substr(5,2)}/{entry.date.substr(2,2)}
+                                </p>
                                 <p>{entry.description}</p>
                             </div>
                             <div>
                                 <p>R${entry.value.toString().replaceAll('.', ',')}</p>
-                                <ion-icon onClick={() => deleteEntry(entry._id)} name="close-circle-outline"></ion-icon>
+                                <ion-icon 
+                                onClick={() => deleteEntry(entry._id)} name="close-circle-outline">
+                                </ion-icon>
                             </div>
                         </Entry>
                     )}

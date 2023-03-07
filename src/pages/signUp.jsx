@@ -1,75 +1,107 @@
 import styled from "styled-components"
-import { Link, useNavigate, useLocation } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useState, useContext } from "react"
 import axios from "axios";
-import {AuthContext} from '../contexts/auth.jsx'
+import { AuthContext } from '../contexts/auth.jsx'
 import { ThreeDots } from "react-loader-spinner";
+import swal from "sweetalert";
 
 
 export default function SignUp() {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+
+    const [form, setForm] = useState({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    })
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const {API_URL} = useContext(AuthContext);
+    const { API_URL } = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
 
 
-    async function signUp() {
-        const user = {
-            name,
-            email,
-            password,
-            confirmPassword
-        }
-        if (password === confirmPassword)
+    async function signUp(e) {
+        e.preventDefault();
+
+        if (form.password === form.confirmPassword)
             try {
                 setClicked(true);
-                const response = await axios.post(`${API_URL}/signUp`, user);
-                navigate('/', {state: response.data});
+                const response = await axios.post(`${API_URL}/signUp`, form);
+                navigate('/', { state: response.data });
             }
             catch (error) {
                 setClicked(false);
                 console.log(error.response.data);
+                swal({
+                    title: "Erro!",
+                    text: error.response.data,
+                    icon: "error"});
                 setError(error.response.data);
-                
             }
         else {
-            setError('Senhas diferentes');
+            swal({
+                title: "Erro!",
+                text:'Senhas diferentes',
+                icon: "error"});
         }
     }
+    function handleForm(e) {
+        setForm({ ...form, [e.target.name]: e.target.value })
+    }
     return (
-        <Wrapper clicked={clicked}>
+        <Wrapper>
             <h1>MyWallet</h1>
-            <input data-test="name" type='text' onChange={(event) => setName(event.target.value) } placeholder='Nome'></input>
-            <input data-test="email" type='email' onChange={(event) => setEmail(event.target.value)} placeholder='E-mail'></input>
-            <input data-test="password" type='password' onChange={(event) => setPassword(event.target.value)} placeholder='Senha'></input>
-            <input data-test="conf-password" type='password' onChange={(event) => setConfirmPassword(event.target.value)} placeholder='Confirme a senha'></input>
-            <div>{error}</div>
-            <button data-test="sign-up-submit" onClick={signUp}>Cadastrar</button>
-            <ThreeDots onClick={signUp} 
-                height="50"
-                width="80"
-                radius="9"
-                color="#8415a0"
-                ariaLabel="three-dots-loading"
-                wrapperStyle={{
-                    display: clicked ? 'flex' : 'none',
-                    justifyContent: 'center',
-                    backgroundColor: '#A328D6',
-                    fontFamily: 'Raleway',
-                    fontSize: 'x-large',
-                    fontWeight: 'bold',
-                    width: '80vw',
-                    height: '50px',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer'
-                }}
-                wrapperClassName=""/>
+            <Form onSubmit={signUp}>
+                <input data-test="name"
+                    name="name"
+                    type='text'
+                    onChange={handleForm}
+                    value={form.name}
+                    placeholder='Nome'
+                    required />
+                <input data-test="email"
+                    name="email"
+                    type='email'
+                    onChange={handleForm}
+                    value={form.email}
+                    placeholder='E-mail'
+                    required />
+                <input data-test="password"
+                    name="password"
+                    type='password'
+                    onChange={handleForm}
+                    value={form.password}
+                    placeholder='Senha'
+                    required />
+                <input data-test="conf-password"
+                    name="confirmPassword"
+                    type='password'
+                    onChange={handleForm}
+                    value={form.confirmPassword}
+                    placeholder='Confirme a senha'
+                    required />
+                <div>{error}</div>
+                <button data-test="sign-up-submit" type="submit" disabled={clicked}>
+                    {clicked ? <ThreeDots
+                        color="#8415a0"
+                        wrapperStyle={{
+                            display: clicked ? 'flex' : 'none',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: '#A328D6',
+                            fontFamily: 'Raleway',
+                            fontSize: 'x-large',
+                            fontWeight: 'bold',
+                            width: '79vw',
+                            height: '50px',
+                            border: 'none',
+                            borderRadius: '5px',
+                            cursor: 'pointer'
+                        }} /> : 'Cadastrar'}</button>
+            </Form>
             <Link to='/'>Já tem uma conta? Entre agora!</Link>
+
         </Wrapper>
     )
 
@@ -90,6 +122,22 @@ const Wrapper = styled.div`
         color:white;
         margin-bottom: 25px;
     }
+    
+    a{
+        margin-top: 35px;
+        font-size: 15px;
+        font-weight: bold;
+        font-family: 'Raleway';
+        color: #FFF;
+        text-decoration: none;
+    }
+    
+`
+
+const Form = styled.form`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     input{
         padding-left: 10px;
         height: 60px;
@@ -106,7 +154,6 @@ const Wrapper = styled.div`
         font-size: 20px;
     }
     button{
-        display: ${props => props.clicked ? 'none' : 'block'};
         background-color: #A328D6;
         font-family: 'Raleway';
         color: #FFF;
@@ -117,14 +164,6 @@ const Wrapper = styled.div`
         border: none;
         border-radius: 5px;
         cursor: pointer;
-    }
-    a{
-        margin-top: 35px;
-        font-size: 15px;
-        font-weight: bold;
-        font-family: 'Raleway';
-        color: #FFF;
-        text-decoration: none;
     }
     div{
         font-size: 20px;

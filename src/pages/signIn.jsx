@@ -4,25 +4,26 @@ import { useContext, useState } from "react";
 import axios from "axios";
 import { AuthContext } from '../contexts/auth.jsx'
 import { ThreeDots } from "react-loader-spinner";
+import swal from 'sweetalert';
 
 export default function SingIn() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [form, setForm] = useState({
+        email: '',
+        password: ''
+    })
+
     const [error, setError] = useState('');
     const { setName, setToken, API_URL } = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
 
     async function signIn(e) {
         e.preventDefault();
-        const user = {
-            email,
-            password
-        }
+        
         try {
             setClicked(true);
-            const response = await axios.post(`${API_URL}/signIn`, user);
+            const response = await axios.post(`${API_URL}/signIn`, form);
             setToken(response.data.token);
             setName(response.data.name);
             navigate('/registry', { state: response.data.name });
@@ -30,40 +31,59 @@ export default function SingIn() {
         catch (error) {
             setClicked(false);
             console.log(error.response.data);
-            setError(error.response.data);
+            swal({
+                title: "Erro!",
+                text: error.response.data[0] ? 
+                error.response.data[0] : error.response.data.message,
+                icon: "error"
+            })
+            setError(error.response.data.message ? error.response.data.message : error.response.data);
         }
     }
 
+    function handleForm(e) {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    }
+
     return (
-        <Wrapper clicked={clicked}>
+        <Wrapper>
             <h1>MyWallet</h1>
             <Form onSubmit={signIn}>
-            <input data-test="email" type='email' required onChange={(event) => setEmail(event.target.value)} placeholder='E-mail'></input>
-            <input data-test="password" type='password' onChange={(event) => setPassword(event.target.value)} placeholder='Senha'></input>
-            <div>{location.state ? location.state : error}</div>
-            <button data-test="sign-in-submit" type='submit'>Entrar</button>
-            <ThreeDots type='submit'
-                height="50"
-                width="80"
-                radius="9"
-                color="#8415a0"
-                ariaLabel="three-dots-loading"
-                wrapperStyle={{
-                    display: clicked ? 'flex' : 'none',
-                    justifyContent: 'center',
-                    backgroundColor: '#A328D6',
-                    fontFamily: 'Raleway',
-                    fontSize: 'x-large',
-                    fontWeight: 'bold',
-                    width: '80vw',
-                    height: '50px',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer'
-                }}
-                wrapperClassName=""/>
+                <input data-test="email"
+                    name="email"
+                    type='email'
+                    onChange={handleForm}
+                    value={form.email}
+                    placeholder='E-mail'
+                    required />
+                <input data-test="password"
+                    name="password"
+                    type='password'
+                    onChange={handleForm}
+                    value={form.password}
+                    placeholder='Senha'
+                    required />
+                <div>{location.state ? location.state : error}</div>
+                <button data-test="sign-in-submit" type='submit' disabled={clicked}>
+                    {clicked ? (<ThreeDots
+                        color="#8415a0"
+                        radius="9"
+                        wrapperStyle={{
+                            display: clicked ? 'flex' : 'none',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: '#A328D6',
+                            fontFamily: 'Raleway',
+                            fontSize: 'x-large',
+                            fontWeight: 'bold',
+                            width: '79vw',
+                            height: '50px',
+                            border: 'none',
+                            borderRadius: '5px',
+                            cursor: 'pointer'
+                        }} />) : 'Entrar'}</button>
             </Form>
-            
+
             <Link to={'/sign-up'}>Primeira vez? Cadastre-se</Link>
         </Wrapper>
     )
@@ -117,7 +137,6 @@ const Form = styled.form`
         font-size: 20px;
     }
     button{
-        display: ${props => props.clicked ? 'none' : 'block'} ;
         background-color: #A328D6;
         font-family: 'Raleway';
         color: #FFF;
