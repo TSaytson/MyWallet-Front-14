@@ -2,81 +2,86 @@ import axios from "axios";
 import { useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components"
-import {AuthContext} from '../contexts/auth.jsx'
+import { AuthContext } from '../contexts/auth.jsx'
+import { useEffect } from "react";
+import { createTransaction } from "../services/transactionApi.js";
 
 
 export default function Transaction() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useContext(AuthContext);
     const [form, setForm] = useState({
         value: 0,
         description: '',
-        date: null
+        date: new Date().toLocaleString().split(',')[0]
     })
     const [error, setError] = useState('');
-    const {token, API_URL} = useContext(AuthContext);
 
     async function saveTransaction(e) {
         e.preventDefault();
-            const transaction = {
-                ...form,
-                type: location.state[0]
-            }
-            console.log(transaction);
-            const headers = {'authorization': `Bearer ${token}`};
+        const transaction = {
+            ...form,
+            type: location.state[0]
+        }
+        console.log(transaction);
 
-            try {
-                const response = await axios
-                    .post(`${API_URL}/transactions`, transaction, {headers});
-                console.log(response);
-                navigate('/registry');
-            }
-            catch (error) {
-                console.log(error);
-                setError(error.response.data);
-            }
+        try {
+            const response = await createTransaction(transaction, user.token);
+            console.log(response);
+            navigate('/registry');
+        }
+        catch (error) {
+            console.log(error);
+            setError(error.response.data[0]);
+        }
     }
 
-    function handleForm(e){
-        setForm({...form, [e.target.name] : e.target.value});
+    function handleForm(e) {
+        setForm({ ...form, [e.target.name]: e.target.value });
+        console.log(form);
     }
+
+    useEffect(() => {
+        const localUser = JSON.parse(localStorage.getItem('user'));
+        if (!localUser || !user) navigate('/')
+    })
+
     return (
         <Wrapper>
             <div>
                 <h1>Nova {location.state[0] === 'entry' ? 'entrada' : 'saída'}</h1>
             </div>
             <StyledForm onSubmit={saveTransaction} error={error}>
-            <label htmlFor="value"></label>
-            <input 
-            required
-            id="value"
-            name="value"
-            onChange={handleForm } 
-            type='number'
-            min='1'
-            placeholder="Valor"
-            />
-            <label htmlFor="description"></label>
-            <input 
-            required
-            id="description"
-            name="description"
-            onChange={ handleForm}
-            type='text' 
-            placeholder="Descrição"
-            />
-            <label htmlFor="date"></label>
-            <input
-            required
-            id="date"
-            name="date"
-            onChange={handleForm}
-            type='date'
-            min='2022-01-01'
-            max='2024-12-31'
-            />
-            <button type='submit'>Salvar {location.state[0] === 'entry' ? 'entrada' : 'saída'}</button>
-            <div>{error}</div>
+                <label htmlFor="value"></label>
+                <input
+                    required
+                    id="value"
+                    name="value"
+                    onChange={handleForm}
+                    type='number'
+                    min='1'
+                    placeholder="Valor"
+                />
+                <label htmlFor="description"></label>
+                <input
+                    required
+                    id="description"
+                    name="description"
+                    onChange={handleForm}
+                    type='text'
+                    placeholder="Descrição"
+                />
+                <label htmlFor="date"></label>
+                <input
+                    id="date"
+                    name="date"
+                    onChange={handleForm}
+                    type='date'
+                    min='2025-01-01'
+                />
+                <button type='submit'>Salvar {location.state[0] === 'entry' ? 'entrada' : 'saída'}</button>
+                <div>{error}</div>
             </StyledForm>
         </Wrapper>
     )

@@ -1,10 +1,11 @@
 import styled from "styled-components"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useContext, useState } from "react";
-import axios from "axios";
 import { AuthContext } from '../contexts/auth.jsx'
 import { ThreeDots } from "react-loader-spinner";
-import swal from 'sweetalert';
+import swal from 'sweetalert2';
+import { signIn } from "../services/authApi.js";
+import { useEffect } from "react";
 
 export default function SingIn() {
     const navigate = useNavigate();
@@ -15,29 +16,42 @@ export default function SingIn() {
     })
 
     const [error, setError] = useState('');
-    const { setName, setToken, API_URL } = useContext(AuthContext);
+    const { setUser } = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
 
-    async function signIn(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
-        
+
         try {
             setClicked(true);
-            const response = await axios.post(`${API_URL}/signIn`, form);
-            setToken(response.data.token);
-            setName(response.data.name);
-            navigate('/registry', { state: response.data.name });
+            const { name, token } = await signIn(form);
+            setUser({ name, token });
+            localStorage.setItem('user',
+                JSON.stringify({ name, token })
+            );
+            swal.fire({
+                icon: 'info',
+                toast: true,
+                timer: 2000,
+                position: 'top-right',
+                showConfirmButton: false,
+                title: `Welcome ${name}. We are delighted you're here`,
+                footer: 'This is your registry'
+            })
+            navigate('/registry', { state: name });
         }
         catch (error) {
             setClicked(false);
-            console.log(error.response.data);
-            swal({
+            console.log(error);
+            const errorMessage = error.response ?
+                error.response.data.message :
+            error.message
+            swal.fire({
                 title: "Erro!",
-                text: error.response.data[0] ? 
-                error.response.data[0] : error.response.data.message,
+                text: errorMessage,
                 icon: "error"
             })
-            setError(error.response.data.message ? error.response.data.message : error.response.data);
+            setError(errorMessage);
         }
     }
 
@@ -45,10 +59,18 @@ export default function SingIn() {
         setForm({ ...form, [e.target.name]: e.target.value });
     }
 
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user) {
+            setUser(user);
+            navigate('/registry')
+        }
+    })
+
     return (
         <Wrapper>
             <h1>MyWallet</h1>
-            <Form onSubmit={signIn}>
+            <Form onSubmit={handleSubmit}>
                 <input data-test="email"
                     name="email"
                     type='email'
@@ -63,8 +85,10 @@ export default function SingIn() {
                     value={form.password}
                     placeholder='Senha'
                     required />
-                <div>{location.state ? location.state : error}</div>
-                <button data-test="sign-in-submit" type='submit' disabled={clicked}>
+                <div style={{ color: '#f02849' }}>
+                    {location.state ? location.state : error}
+                </div>
+                <button type='submit' disabled={clicked}>
                     {clicked ? (<ThreeDots
                         color="#8415a0"
                         radius="9"

@@ -2,14 +2,14 @@ import { createContext, useState } from "react";
 
 export const AuthContext = createContext({});
 
-export default function AuthProvider({children}){
-    
-    const [token, setToken] = useState(null);
-    const [name, setName] = useState('');
-    const API_URL = import.meta.env.VITE_APP_API_URL;
+export default function AuthProvider({ children }) {
 
-    return(
-        <AuthContext.Provider value={ { name, setName, token, setToken, API_URL } } >
+    const [user, setUser] = useState(null);
+
+    return (
+        <AuthContext.Provider value={{
+            user, setUser
+        }} >
             {children}
         </AuthContext.Provider>
     );

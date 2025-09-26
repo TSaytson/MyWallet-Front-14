@@ -3,91 +3,97 @@ import { useEffect, useState, useContext } from "react"
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { AuthContext } from '../contexts/auth.jsx'
+import TopBar from "../components/TopBar.jsx";
+import { getTransactions } from "../services/transactionApi.js";
+import Swal from "sweetalert2";
 
 
 export default function Registry() {
     const navigate = useNavigate();
-    const [entries, setEntries] = useState([]);
-    const { name, token, setToken, API_URL } = useContext(AuthContext);
+    const [transactions, setTransactions] = useState([]);
+    const { user, setUser } = useContext(AuthContext);
 
     let balance = 0;
-    entries.forEach((entry) => {
+
+    async function fetchTransactions() {
+        try {
+            const response = await getTransactions(user.token);
+            console.log(response);
+            setTransactions(response);
+        } catch (error) {
+            if (error.response.data.message === 'Invalid token') {
+                localStorage.removeItem('user');
+                navigate('/')
+            }
+            Swal.fire({
+                title: 'Error',
+                icon: 'error',
+                toast: true,
+                position: 'top-right',
+                text: `Failed to get transactions`
+            })
+        }
+    }
+
+    transactions.forEach((entry) => {
         {
             entry.type === 'withdraw' ?
                 balance -= Number(entry.value) : balance += Number(entry.value)
         }
     });
-    async function getEntries() {
-        const headers = {
-            "authorization": `Bearer ${token}`
-        }
-        try {
-            const response = await axios.get(`${API_URL}/transactions`, {headers});
-            console.log(response.data);
-            setEntries(response.data);
-        } catch (error) {
-            console.log(error);
-        }
-    }
+
     async function deleteEntry(id) {
         if (window.confirm('Excluir?')) {
-            const headers = { "authorization": `Bearer ${token}` }
+            const headers = { "authorization": `Bearer ${user.token}` }
             try {
-                const response = await axios.delete(`${API_URL}/transactions/${id}`, {headers});
+                const response = await axios.delete(`${API_URL}/transactions/${id}`, { headers });
                 console.log(response.data);
-                getEntries();
+                fetchTransactions();
             } catch (error) {
                 console.log(error);
             }
         }
     }
     useEffect(() => {
-        getEntries();
+        const localUser = JSON.parse(localStorage.getItem('user'));
+        if (!user || !localUser) navigate('/')
+        fetchTransactions();
     }, []);
 
     return (
         <Wrapper>
-            <div>
-                <h1 data-test="user-name">Olá, {name}</h1>
-                <ion-icon data-test="logout" name="log-out-outline" onClick={() => {
-                    setToken(null);
-                    navigate('/')
-                }}></ion-icon>
-            </div>
-            <Entries hasEntries={entries.length} balance={balance}>
-                {(entries.length === 0) ?
-                    'Não há registro de entrada ou saída' : entries.map((entry, index) =>
+            <TopBar />
+            <Entries hasEntries={transactions.length} balance={balance}>
+                {transactions.length ?
+                    transactions.map((entry, index) =>
                         <Entry type={entry.type} key={index}>
                             <div>
                                 <p>
-                                    {entry.date.substr(8,2)}/{entry.date.substr(5,2)}/{entry.date.substr(2,2)}
+                                    {entry.date.substr(8, 2)}/{entry.date.substr(5, 2)}/{entry.date.substr(2, 2)}
                                 </p>
                                 <p>{entry.description}</p>
                             </div>
                             <div>
                                 <p>R${entry.value.toString().replaceAll('.', ',')}</p>
-                                <ion-icon 
-                                onClick={() => deleteEntry(entry._id)} name="close-circle-outline">
+                                <ion-icon name="close-circle-outline"
+                                    onClick={() => deleteEntry(entry._id)}>
                                 </ion-icon>
                             </div>
-                        </Entry>
-                    )}
-                <div>
-                    {(entries.length) ?
-                        <>
-                            <p>SALDO</p>
-                            <p>R${balance}</p>
-                        </>
-                        : ''
-                    }
-                </div>
+                        </Entry>)
+                    : 'Não há registro de entrada ou saída'}
+                {(!transactions.length) ||
+                    <div>
+                        <p>SALDO</p>
+                        <p>R${balance}</p>
+                    </div>
+                }
             </Entries>
             <Bottom>
-                <div onClick={() => navigate('/transaction', { state: ['entry', token] })}>
+                <div onClick={() => navigate('/transaction', { state: ['entry', user.token] })}>
                     <ion-icon name="add-circle-outline"></ion-icon>
                     <p>Nova entrada</p>
                 </div>
-                <div onClick={() => navigate('/transaction', { state: ['withdraw', token] })}>
+                <div onClick={() => navigate('/transaction', { state: ['withdraw', user.token] })}>
                     <ion-icon name="remove-circle-outline"></ion-icon>
                     <p>Nova saída</p>
                 </div>
@@ -155,10 +161,9 @@ const Entries = styled.main`
             font-weight: bold;
         }
         p:nth-child(2){
-            color:#03AC00;
+            color:${(props) => props.balance >= 0 ? '#03AC00' : 'red'};
             font-size: 17px;
         }
-
     }
 `
 const Entry = styled.ul`

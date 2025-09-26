@@ -1,10 +1,10 @@
 import styled from "styled-components"
 import { Link, useNavigate } from "react-router-dom"
 import { useState, useContext } from "react"
-import axios from "axios";
 import { AuthContext } from '../contexts/auth.jsx'
 import { ThreeDots } from "react-loader-spinner";
-import swal from "sweetalert";
+import swal from "sweetalert2";
+import { signUp } from "../services/authApi.js";
 
 
 export default function SignUp() {
@@ -17,33 +17,52 @@ export default function SignUp() {
     })
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const { API_URL } = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
 
-
-    async function signUp(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
 
         if (form.password === form.confirmPassword)
             try {
                 setClicked(true);
-                const response = await axios.post(`${API_URL}/signUp`, form);
-                navigate('/', { state: response.data });
+                const { message } = await signUp(form);
+                swal.fire({
+                    icon: 'success',
+                    title: 'User Registred',
+                    text: message,
+                    showConfirmButton: false,
+                    timer: 1500,
+                    toast: true,
+                    position: 'top-right'
+                })
+                navigate('/', { state: message })
             }
             catch (error) {
                 setClicked(false);
                 console.log(error.response.data);
-                swal({
+                swal.fire({
                     title: "Erro!",
-                    text: error.response.data,
-                    icon: "error"});
-                setError(error.response.data);
+                    toast: true,
+                    position: 'top-right',
+                    timer: 2000,
+                    confirmButtonText: 'Go to sign in?',
+                    text: error.response.data.message,
+                    icon: "error"
+                }).then((result) => {
+                    result.isConfirmed ? navigate('/')
+                    : ''
+                });
+                setError(error.response.data.message);
             }
         else {
-            swal({
+            swal.fire({
                 title: "Erro!",
-                text:'Senhas diferentes',
-                icon: "error"});
+                text: 'Senhas diferentes',
+                icon: "error",
+                toast:true,
+                position: 'top-right'
+            });
+            setError("Password does not match")
         }
     }
     function handleForm(e) {
@@ -52,7 +71,7 @@ export default function SignUp() {
     return (
         <Wrapper>
             <h1>MyWallet</h1>
-            <Form onSubmit={signUp}>
+            <Form onSubmit={handleSubmit}>
                 <input data-test="name"
                     name="name"
                     type='text'
@@ -81,7 +100,7 @@ export default function SignUp() {
                     value={form.confirmPassword}
                     placeholder='Confirme a senha'
                     required />
-                <div>{error}</div>
+                <div style={{color: '#fb2331'}}>{error}</div>
                 <button data-test="sign-up-submit" type="submit" disabled={clicked}>
                     {clicked ? <ThreeDots
                         color="#8415a0"
