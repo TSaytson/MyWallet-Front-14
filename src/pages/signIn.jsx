@@ -14,10 +14,9 @@ export default function SingIn() {
         email: '',
         password: ''
     })
-
     const [error, setError] = useState('');
-    const { setUser } = useContext(AuthContext);
     const [clicked, setClicked] = useState(false);
+    const { setUser } = useContext(AuthContext);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -35,10 +34,10 @@ export default function SingIn() {
                 timer: 2000,
                 position: 'top-right',
                 showConfirmButton: false,
-                title: `Welcome ${name}. We are delighted you're here`,
+                title: `Welcome ${name} We are delighted you're here`,
                 footer: 'This is your registry'
             })
-            navigate('/registry', { state: name });
+            navigate('/registry');
         }
         catch (error) {
             setClicked(false);
@@ -71,14 +70,14 @@ export default function SingIn() {
         <Wrapper>
             <h1>MyWallet</h1>
             <Form onSubmit={handleSubmit}>
-                <input data-test="email"
+                <input
                     name="email"
                     type='email'
                     onChange={handleForm}
                     value={form.email}
                     placeholder='E-mail'
                     required />
-                <input data-test="password"
+                <input
                     name="password"
                     type='password'
                     onChange={handleForm}
@@ -100,7 +99,7 @@ export default function SingIn() {
                             fontFamily: 'Raleway',
                             fontSize: 'x-large',
                             fontWeight: 'bold',
-                            width: '79vw',
+                            width: '200px',
                             height: '50px',
                             border: 'none',
                             borderRadius: '5px',
@@ -111,7 +110,6 @@ export default function SingIn() {
             <Link to={'/sign-up'}>Primeira vez? Cadastre-se</Link>
         </Wrapper>
     )
-
 }
 
 const Wrapper = styled.div`
@@ -137,9 +135,13 @@ const Wrapper = styled.div`
         font-family: 'Raleway';
         color: #FFF;
         text-decoration: none;
+        transition: .2s;
+        &:hover{
+            transform: scale(1.1);
+        }
     }
-    
 `
+
 const Form = styled.form`
     display: flex;
     flex-direction: column;
@@ -166,11 +168,16 @@ const Form = styled.form`
         color: #FFF;
         font-size: 20px;
         font-weight: bold;
-        width: 80vw;
+        width: 200px;
         height: 50px;
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        transition: .2s;
+        &:hover{
+            transform: scale(1.05);
+            filter: brightness(110%);
+        }
     }
     div{
         margin-bottom: 10px;

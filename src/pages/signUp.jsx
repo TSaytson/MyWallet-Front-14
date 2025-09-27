@@ -8,15 +8,16 @@ import { signUp } from "../services/authApi.js";
 
 
 export default function SignUp() {
+    const navigate = useNavigate();
 
     const [form, setForm] = useState({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
         confirmPassword: ''
     })
     const [error, setError] = useState('');
-    const navigate = useNavigate();
     const [clicked, setClicked] = useState(false);
 
     async function handleSubmit(e) {
@@ -72,21 +73,28 @@ export default function SignUp() {
         <Wrapper>
             <h1>MyWallet</h1>
             <Form onSubmit={handleSubmit}>
-                <input data-test="name"
-                    name="name"
+                <input
+                    name="firstName"
                     type='text'
                     onChange={handleForm}
-                    value={form.name}
-                    placeholder='Nome'
+                    value={form.firstName}
+                    placeholder='First name'
                     required />
-                <input data-test="email"
+                <input
+                    name="lastName"
+                    type='text'
+                    onChange={handleForm}
+                    value={form.lastName}
+                    placeholder='Last name'
+                    required />
+                <input
                     name="email"
                     type='email'
                     onChange={handleForm}
                     value={form.email}
                     placeholder='E-mail'
                     required />
-                <input data-test="password"
+                <input
                     name="password"
                     type='password'
                     onChange={handleForm}
@@ -149,6 +157,10 @@ const Wrapper = styled.div`
         font-family: 'Raleway';
         color: #FFF;
         text-decoration: none;
+        transition: all.2s;
+        &:hover{
+            transform: scale(1.1);
+        }
     }
     
 `
@@ -178,11 +190,16 @@ const Form = styled.form`
         color: #FFF;
         font-size: 20px;
         font-weight: bold;
-        width: 80vw;
+        width: 200px;
         height: 50px;
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        transition: .2s;
+        &:hover{
+            transform: scale(1.05);
+            filter: brightness(110%);
+        }
     }
     div{
         font-size: 20px;

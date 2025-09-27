@@ -8,8 +8,11 @@ export async function createTransaction(transaction, token){
   return response.data
 }
 
-export async function deleteTransaction(){
+export async function deleteTransaction(id, token){
+  const headers = useConfigHeader(token);
+  const response = await api.delete(`/transactions/${id}`, headers);
 
+  return response.data
 }
 
 export async function getTransactions(token){

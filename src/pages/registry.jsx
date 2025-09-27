@@ -1,11 +1,10 @@
-import axios from "axios";
 import { useEffect, useState, useContext } from "react"
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import Swal from "sweetalert2";
 import { AuthContext } from '../contexts/auth.jsx'
 import TopBar from "../components/TopBar.jsx";
-import { getTransactions } from "../services/transactionApi.js";
-import Swal from "sweetalert2";
+import { deleteTransaction, getTransactions } from "../services/transactionApi.js";
 
 
 export default function Registry() {
@@ -18,7 +17,6 @@ export default function Registry() {
     async function fetchTransactions() {
         try {
             const response = await getTransactions(user.token);
-            console.log(response);
             setTransactions(response);
         } catch (error) {
             if (error.response.data.message === 'Invalid token') {
@@ -42,18 +40,36 @@ export default function Registry() {
         }
     });
 
-    async function deleteEntry(id) {
-        if (window.confirm('Excluir?')) {
-            const headers = { "authorization": `Bearer ${user.token}` }
-            try {
-                const response = await axios.delete(`${API_URL}/transactions/${id}`, { headers });
-                console.log(response.data);
-                fetchTransactions();
-            } catch (error) {
-                console.log(error);
+    async function deleteEntry(entry) {
+        Swal.fire({
+            title: "Delete",
+            text: `Do you want to delete "${entry.description}"?`,
+            showDenyButton: true,
+            confirmButtonText: 'Yes',
+            preConfirm: async () => {
+                try {
+                    await deleteTransaction(entry._id, user.token);
+                } catch (error) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: error.response.data.message,
+                        icon: 'error'
+                    });
+                }
             }
-        }
+        }).then((result) => {
+            if (result.isConfirmed)
+                Swal.fire({
+                    title: 'Deleted',
+                    text: `Transaction deleted`,
+                    icon: 'info',
+                    toast: true,
+                    position: 'top-right'
+                })
+            fetchTransactions();
+        })
     }
+
     useEffect(() => {
         const localUser = JSON.parse(localStorage.getItem('user'));
         if (!user || !localUser) navigate('/')
@@ -74,9 +90,9 @@ export default function Registry() {
                                 <p>{entry.description}</p>
                             </div>
                             <div>
-                                <p>R${entry.value.toString().replaceAll('.', ',')}</p>
+                                <p>R$ {entry.value.toString().replaceAll('.', ',')}</p>
                                 <ion-icon name="close-circle-outline"
-                                    onClick={() => deleteEntry(entry._id)}>
+                                    onClick={() => deleteEntry(entry)}>
                                 </ion-icon>
                             </div>
                         </Entry>)
@@ -84,7 +100,7 @@ export default function Registry() {
                 {(!transactions.length) ||
                     <div>
                         <p>SALDO</p>
-                        <p>R${balance}</p>
+                        <p>R$ {balance}</p>
                     </div>
                 }
             </Entries>

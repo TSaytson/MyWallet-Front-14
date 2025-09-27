@@ -1,9 +1,8 @@
-import axios from "axios";
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import styled from "styled-components"
-import { AuthContext } from '../contexts/auth.jsx'
-import { useEffect } from "react";
+import styled from "styled-components";
+import swal from "sweetalert2";
+import { AuthContext } from '../contexts/auth.jsx';
 import { createTransaction } from "../services/transactionApi.js";
 
 
@@ -28,7 +27,14 @@ export default function Transaction() {
 
         try {
             const response = await createTransaction(transaction, user.token);
-            console.log(response);
+            swal.fire({
+                icon: 'success',
+                text: `${response.message}`,
+                toast: true,
+                showConfirmButton: false,
+                position: 'top-right',
+                timer: 2000
+            })
             navigate('/registry');
         }
         catch (error) {
@@ -39,7 +45,6 @@ export default function Transaction() {
 
     function handleForm(e) {
         setForm({ ...form, [e.target.name]: e.target.value });
-        console.log(form);
     }
 
     useEffect(() => {
